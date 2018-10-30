@@ -47,9 +47,11 @@ func main() {
 	//睡一秒
 	time.Sleep(1 * time.Second)
 
-	//取消上下文
+	//取消上下文 —> 导致 "exec.CommandContex" 中断（context.Context 里面由有一个context: chan, cancelFunc(): 关闭 chan）
+	//cmd 会监听 ctx.Done() ,然后kill pid，杀死子进程
 	cancelFunc()
 
+	//在main协程中等待子协程退出，打印执行结果
 	res = <-resultChan
 
 	fmt.Println(res.err, string(res.output))
