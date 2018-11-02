@@ -51,7 +51,7 @@ func main() {
 	//cmd 会监听 ctx.Done() ,然后kill pid，杀死子进程
 	cancelFunc()
 
-	//在main协程中等待子协程退出，打印执行结果
+	//在main协程中等待子协程退出，打印执行结果X'z'x
 	res = <-resultChan
 
 	fmt.Println(res.err, string(res.output))
