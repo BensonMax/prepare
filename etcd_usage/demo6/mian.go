@@ -23,6 +23,8 @@ func main() {
 		putResp        *clientv3.PutResponse
 		kv             clientv3.KV
 		getResp        *clientv3.GetResponse
+		keepResp       *clientv3.LeaseKeepAliveResponse
+		keepRespChan   <-chan *clientv3.LeaseKeepAliveResponse
 	)
 	config = clientv3.Config{
 		Endpoints:   []string{"http://47.75.179.127:2379/"}, //服务集群
@@ -35,6 +37,8 @@ func main() {
 
 	//申请租约
 	lease = clientv3.NewLease(client)
+
+	//获得一个10秒的租约
 	if leaseGrantResp, err = lease.Grant(context.TODO(), 10); err != nil {
 		fmt.Println(err)
 		return
@@ -42,6 +46,27 @@ func main() {
 
 	//拿到租约ID
 	leaseId = leaseGrantResp.ID
+
+	//自动续租
+	if keepRespChan, err = lease.KeepAlive(context.TODO(), leaseId); err != nil {
+		fmt.Println(err)
+		return
+	}
+	//处理续租应答的协程
+	go func() {
+		for {
+			select {
+			case keepResp = <-keepRespChan:
+				if keepRespChan == nil {
+					fmt.Println("租约已经失效")
+					goto END
+				} else {
+					fmt.Println("收到续租应答：", keepResp.ID)
+				}
+			}
+		}
+	END:
+	}()
 
 	//h获得 KV API子集
 	kv = clientv3.NewKV(client)
