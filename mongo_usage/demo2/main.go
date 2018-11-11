@@ -50,7 +50,7 @@ func main() {
 	//插入记录(bson）
 	record = &LogRecord{
 		JobName:   "job10",
-		Command:   "echo hello",
+		Command:   "echo hello1",
 		Err:       "",
 		Content:   "hello",
 		TimePoint: TimePoint{StartTime: time.Now().Unix(), EndTime: time.Now().Unix() + 10},
